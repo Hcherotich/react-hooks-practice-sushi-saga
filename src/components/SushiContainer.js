@@ -2,32 +2,46 @@ import React, { useState, useEffect } from 'react';
 import Sushi from './Sushi';
 import MoreButton from './MoreButton';
 
-const SushiContainer = ({ eatSushi }) => {
+function SushiContainer() {
   const [sushiData, setSushiData] = useState([]);
-  const [index, setIndex] = useState(0);
+  const [startIndex, setStartIndex] = useState(0);
 
   useEffect(() => {
-    fetch('http://localhost:3001/sushis')
-      .then(response => response.json())
-      .then(data => setSushiData(data));
+    fetchData();
   }, []);
 
+  const fetchData = () => {
+    fetch('http://localhost:3001/sushi')
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Failed to fetch data');
+        }
+        return response.json();
+      })
+      .then(data => {
+        setSushiData(data);
+      })
+      .catch(error => {
+        console.error('Error fetching data:', error);
+      });
+  };
+
+  const handleMoreButtonClick = () => {
+    setStartIndex(prevIndex => prevIndex + 4);
+  };
+
   const renderSushi = () => {
-    return sushiData.slice(index, index + 4).map(sushi => (
-      <Sushi key={sushi.id} sushi={sushi} eatSushi={eatSushi} />
+    return sushiData.slice(startIndex, startIndex + 4).map(sushi => (
+      <Sushi key={sushi.id} sushi={sushi} />
     ));
   };
 
-  const handleMoreClick = () => {
-    setIndex(prevIndex => prevIndex + 4);
-  };
-
   return (
-    <div className="sushi-container">
+    <div className="belt">
       {renderSushi()}
-      <MoreButton onClick={handleMoreClick} />
+      <MoreButton onClick={handleMoreButtonClick} />
     </div>
   );
-};
+}
 
 export default SushiContainer;
